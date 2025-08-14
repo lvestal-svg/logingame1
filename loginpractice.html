@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Username & Password Typing Game</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', sans-serif;
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+        text-align: center;
+        padding: 20px;
+        overflow-x: hidden;
+    }
+    h1 {
+        color: #ff4081;
+        animation: bounce 1.5s infinite;
+    }
+    input {
+        padding: 10px;
+        font-size: 1.2em;
+        border-radius: 10px;
+        border: 2px solid #555;
+        width: 250px;
+        margin: 10px;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 1.2em;
+        border-radius: 10px;
+        border: none;
+        background-color: #4cafef;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    button:hover {
+        background-color: #1e88e5;
+        transform: scale(1.05);
+    }
+    .success {
+        font-size: 1.5em;
+        margin-top: 20px;
+    }
+    .celebration {
+        font-size: 2em;
+        animation: bounce 1s infinite;
+        color: #ff4081;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .reminder-box {
+        background-color: #fff3cd;
+        padding: 20px;
+        border: 3px solid #ff9800;
+        border-radius: 15px;
+        display: inline-block;
+        max-width: 350px;
+    }
+    .mascot {
+        font-size: 3em;
+        transition: transform 0.3s;
+    }
+    .speech {
+        background: white;
+        border-radius: 15px;
+        padding: 10px;
+        margin-top: 10px;
+        display: inline-block;
+        font-size: 1.1em;
+        border: 2px solid #ccc;
+    }
+</style>
+</head>
+<body>
+
+<h1>Typing Practice Game 🎯</h1>
+
+<!-- Step 1: Set Username & Password -->
+<div id="step1">
+    <h2>Step 1: Enter your username</h2>
+    <input type="text" id="setUsername" placeholder="Type your username">
+    <br>
+    <h2>Step 2: Enter your password</h2>
+    <input type="text" id="setPassword" placeholder="Type your password">
+    <br>
+    <button onclick="saveCredentials()">Start Game</button>
+</div>
+
+<!-- Game Screen -->
+<div id="game" style="display:none;">
+    <div class="mascot" id="mascotFace">💻</div>
+    <h2>Type your username:</h2>
+    <input type="text" id="usernameInput" placeholder="Type here">
+    <h2>Type your password:</h2>
+    <input type="text" id="passwordInput" placeholder="Type here">
+    <br>
+    <button onclick="checkEntry()">Check</button>
+    <div class="success" id="status"></div>
+</div>
+
+<!-- Reminder Screen -->
+<div id="reminderScreen" style="display:none;">
+    <div class="reminder-box">
+        <div class="mascot" id="reminderMascot">😟</div>
+        <div class="speech">Oops! Let's try again — here’s your info:</div>
+        <p><strong>Username:</strong> <span id="remindUsername"></span></p>
+        <p><strong>Password:</strong> <span id="remindPassword"></span></p>
+        <button onclick="returnToGame()">Got it! 👍</button>
+    </div>
+</div>
+
+<!-- Win Screen -->
+<div id="winScreen" style="display:none;">
+    <h1 class="celebration">🎉 YOU DID IT! 🎉</h1>
+    <p>You typed your username & password correctly 5 times!</p>
+    <canvas id="confettiCanvas"></canvas>
+    <br><br>
+    <button onclick="restartGame()">Play Again 🔄</button>
+</div>
+
+<script>
+// Variables
+let savedUsername = "";
+let savedPassword = "";
+let correctCount = 0;
+
+// Save credentials
+function saveCredentials() {
+    savedUsername = document.getElementById("setUsername").value.trim();
+    savedPassword = document.getElementById("setPassword").value.trim();
+    if(savedUsername && savedPassword) {
+        document.getElementById("step1").style.display = "none";
+        document.getElementById("game").style.display = "block";
+        correctCount = 0;
+        document.getElementById("status").innerText = "";
+        document.getElementById("mascotFace").innerText = "💻"; // Neutral face
+    } else {
+        alert("Please fill in both username and password.");
+    }
+}
+
+// Check typed values
+function checkEntry() {
+    const usernameInput = document.getElementById("usernameInput").value.trim();
+    const passwordInput = document.getElementById("passwordInput").value.trim();
+
+    if(usernameInput === savedUsername && passwordInput === savedPassword) {
+        correctCount++;
+        document.getElementById("status").innerText = `✅ Correct! ${correctCount}/5`;
+        document.getElementById("status").style.color = "#4caf50";
+        document.getElementById("usernameInput").value = "";
+        document.getElementById("passwordInput").value = "";
+        document.getElementById("mascotFace").innerText = "😄"; // Happy face
+
+        if(correctCount >= 5) {
+            document.getElementById("game").style.display = "none";
+            document.getElementById("winScreen").style.display = "block";
+            startConfetti();
+        }
+    } else {
+        // Show reminder
+        document.getElementById("remindUsername").innerText = savedUsername;
+        document.getElementById("remindPassword").innerText = savedPassword;
+        document.getElementById("mascotFace").innerText = "💻"; // Reset main face
+        document.getElementById("reminderMascot").innerText = "😟"; // Concerned face
+        document.getElementById("game").style.display = "none";
+        document.getElementById("reminderScreen").style.display = "block";
+    }
+}
+
+// Return to game from reminder
+function returnToGame() {
+    document.getElementById("reminderScreen").style.display = "none";
+    document.getElementById("game").style.display = "block";
+    document.getElementById("usernameInput").value = "";
+    document.getElementById("passwordInput").value = "";
+    document.getElementById("status").innerText = "";
+}
+
+// Restart game
+function restartGame() {
+    document.getElementById("winScreen").style.display = "none";
+    document.getElementById("step1").style.display = "block";
+    document.getElementById("setUsername").value = "";
+    document.getElementById("setPassword").value = "";
+    correctCount = 0;
+    savedUsername = "";
+    savedPassword = "";
+}
+
+// Confetti celebration
+function startConfetti() {
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const confetti = [];
+    for (let i = 0; i < 300; i++) { // more pieces
+        confetti.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            r: Math.random() * 6 + 4,
+            d: Math.random() * 2 + 2, // faster fall speed
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            tilt: Math.random() * 10 - 10
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confetti.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, false);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        });
+        update();
+    }
+
+    function update() {
+        confetti.forEach(p => {
+            p.y += p.d;
+            p.x += Math.sin(p.tilt);
+            if (p.y > canvas.height) {
+                p.y = -10;
+                p.x = Math.random() * canvas.width;
+            }
+        });
+    }
+
+    function loop() {
+        draw();
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+</script>
+
+</body>
+</html>
